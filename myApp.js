@@ -76,11 +76,15 @@ const addExercise = (_id, body, done) => {
   });
 }
 
-const getUserLogs = (_id, done) => {
+const getUserLogs = (_id, from, to, limit, done) => {
   UserModel.findOne({_id: _id}, (err1, userData) => {
     if (err1) done(err1);
     else {
-      ExerciseModel.find({user_id: _id}, (err2, exerciseData) => {
+      let filter = { user_id: _id };
+      if (from != null) filter.date = { $gte: from };
+      if (to != null) filter.date = { $lte: to };
+
+      ExerciseModel.find(filter, (err2, exerciseData) => {
         if (err2) done(err2);
         else {
           let logData = Array();
@@ -153,14 +157,7 @@ const deleteAllExercises = done => {
 const getAllExercises = done => {
   ExerciseModel.find({}, (err, data) => {
     if (err) done(err.message);
-    else {
-      let arrData = {};
-      for (i=0; i < data.length; i++) {
-        if (data[i].date) arrData[i] = data[i].date.toString();
-        else arrData[i] = "-----";
-      }
-      done(null, arrData);
-    }
+    else done(null, data);
   });
 }
 

@@ -42,7 +42,12 @@ app.post('/api/users/:_id/exercises', (req, res) => {
 
 const getUserLogs = require("./myApp.js").getUserLogs;
 app.get('/api/users/:_id/logs', (req, res) => {
-  getUserLogs(req.params._id, (err, data) => {
+  getUserLogs(
+    req.params._id,
+    req.query.from,
+    req.query.to,
+    req.query.limit,
+    (err, data) => {
     if (err) res.send({ error: err })
     else res.send(data);
   });
