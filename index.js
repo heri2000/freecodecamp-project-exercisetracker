@@ -20,14 +20,14 @@ const addNewUSer = require("./myApp.js").addNewUSer;
 app.post('/api/users', (req, res) => {
   let username = req.body.username;
   addNewUSer(username, (err, data) => {
-    if (err) res.json({ error: err })
+    if (err) res.send({ error: err })
     else res.send(data);
   })
 });
 
-const findAllUsers = require("./myApp.js").findAllUsers;
+const getAllUsers = require("./myApp.js").getAllUsers;
 app.get('/api/users', (req, res) => {
-  findAllUsers((err, data) => {
+  getAllUsers((err, data) => {
     res.send(data);
   });
 });
@@ -35,7 +35,15 @@ app.get('/api/users', (req, res) => {
 const addExercise = require("./myApp.js").addExercise;
 app.post('/api/users/:_id/exercises', (req, res) => {
   addExercise(req.params._id, req.body, (err, data) => {
-    if (err) res.json({ error: err })
+    if (err) res.send({ error: err })
+    else res.send(data);
+  });
+});
+
+const getUserLogs = require("./myApp.js").getUserLogs;
+app.get('/api/users/:_id/logs', (req, res) => {
+  getUserLogs(req.params._id, (err, data) => {
+    if (err) res.send({ error: err })
     else res.send(data);
   });
 });
@@ -43,7 +51,7 @@ app.post('/api/users/:_id/exercises', (req, res) => {
 
 
 const fillDummyData = require("./myApp.js").fillDummyData;
-app.post('/api/filldummydata', (req, res) => {
+app.get('/api/filldummydata', (req, res) => {
   fillDummyData((err, data) => {
     if (err) res.json({ error: err })
     else res.send(data);
@@ -51,7 +59,7 @@ app.post('/api/filldummydata', (req, res) => {
 });
 
 const deleteAllUsers = require("./myApp.js").deleteAllUsers;
-app.post('/api/deleteallusers', (req, res) => {
+app.get('/api/deleteallusers', (req, res) => {
   deleteAllUsers((err, data) => {
     if (err) res.json({ error: err })
     else res.send(data);
@@ -59,12 +67,20 @@ app.post('/api/deleteallusers', (req, res) => {
 });
 
 const deleteAllExercises = require("./myApp.js").deleteAllExercises;
-app.post('/api/deleteallexercises', (req, res) => {
+app.get('/api/deleteallexercises', (req, res) => {
   deleteAllExercises((err, data) => {
     if (err) res.json({ error: err })
     else res.send(data);
   })
 });
+
+const getAllExercises = require("./myApp.js").getAllExercises;
+app.get('/api/exercises', (req, res) => {
+  getAllExercises((err, data) => {
+    res.send(data);
+  });
+});
+
 
 
 const listener = app.listen(process.env.PORT || 80, () => {

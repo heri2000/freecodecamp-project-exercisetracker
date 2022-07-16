@@ -22,13 +22,12 @@ const addNewUSer = (username, done) => {
   });
 }
 
-const findAllUsers = done => {
+const getAllUsers = done => {
   UserModel.find({}, (err, data) => {
     if (err) done(err.message);
     else done(null, data);
   });
 }
-
 
 const exerciseSchema = new Schema({
   user_id: { type: String, required: true },
@@ -38,7 +37,6 @@ const exerciseSchema = new Schema({
 }, { collection: "exercise" });
 
 const ExerciseModel = mongoose.model("exercise", exerciseSchema);
-
 
 const addExercise = (_id, body, done) => {
   UserModel.findOne({_id: _id}, (err1, data1) => {
@@ -55,15 +53,19 @@ const addExercise = (_id, body, done) => {
         let exercise = new ExerciseModel(body);
         exercise.user_id = _id;
 
-        exercise.save((err1, data1) => {
-          if (err1) done(err1);
+        exercise.save((err2, data2) => {
+          if (err2) done(err2);
           else {
+            let date = new Date();
+            if (exercise.date) {
+              date = new Date(exercise.date);
+            }
             done(null, {
               _id: exercise.user_id,
               username: username,
               description: exercise.description,
               duration: exercise.duration,
-              date: dateToStringDate(new Date(exercise.date))
+              date: dateToStringDate(date)
             });
           }
         });
@@ -74,6 +76,39 @@ const addExercise = (_id, body, done) => {
   });
 }
 
+const getUserLogs = (_id, done) => {
+  UserModel.findOne({_id: _id}, (err1, userData) => {
+    if (err1) done(err1);
+    else {
+      ExerciseModel.find({user_id: _id}, (err2, exerciseData) => {
+        if (err2) done(err2);
+        else {
+          let logData = Array();
+          for (i=0; i < exerciseData.length; i++) {
+            let date = new Date();
+            if (exerciseData[i].date) {
+              date = new Date(exerciseData[i].date);
+            }
+            logData[i] = {
+              description: exerciseData[i].description,
+              duration: exerciseData[i].duration,
+              date: dateToStringDate(date)
+            };
+          }
+
+          let responseData = {
+            _id: userData._id,
+            username: userData.username,
+            count: exerciseData.length,
+            log: logData
+          };
+
+          done(null, responseData);
+        }
+      });
+    }
+  });
+}
 
 const dateToSqlDate = date => {
   let year = new Intl.DateTimeFormat('en', { year: 'numeric' }).format(date);
@@ -89,8 +124,6 @@ const dateToStringDate = date => {
   let dayOfWeek = new Intl.DateTimeFormat('en', { weekday: 'short' }).format(date);
   return dayOfWeek + " " + month + " " + day + " " + year;
 }
-
-
 
 
 const fillDummyData = done => {
@@ -117,11 +150,29 @@ const deleteAllExercises = done => {
   });
 }
 
+const getAllExercises = done => {
+  ExerciseModel.find({}, (err, data) => {
+    if (err) done(err.message);
+    else {
+      let arrData = {};
+      for (i=0; i < data.length; i++) {
+        if (data[i].date) arrData[i] = data[i].date.toString();
+        else arrData[i] = "-----";
+      }
+      done(null, arrData);
+    }
+  });
+}
+
+
+
 exports.UserModel = UserModel;
 exports.addNewUSer = addNewUSer;
-exports.findAllUsers = findAllUsers;
+exports.getAllUsers = getAllUsers;
 exports.addExercise = addExercise;
+exports.getUserLogs = getUserLogs;
 
 exports.deleteAllUsers = deleteAllUsers;
 exports.deleteAllExercises = deleteAllExercises;
 exports.fillDummyData = fillDummyData;
+exports.getAllExercises = getAllExercises;
