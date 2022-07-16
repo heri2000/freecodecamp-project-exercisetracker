@@ -80,36 +80,42 @@ const getUserLogs = (_id, from, to, limit, done) => {
   UserModel.findOne({_id: _id}, (err1, userData) => {
     if (err1) done(err1);
     else {
-      let filter = { user_id: _id };
-      if (from != null) filter.date = { $gte: from };
-      if (to != null) filter.date = { $lte: to };
+      try {
+        let filter = { user_id: _id };
+        if (from != null) filter.date = { $gte: from };
+        if (to != null) filter.date = { $lte: to };
+        if (limit == null) limit = 0;
+        else limit = Number.parseInt(limit);
 
-      ExerciseModel.find(filter, (err2, exerciseData) => {
-        if (err2) done(err2);
-        else {
-          let logData = Array();
-          for (i=0; i < exerciseData.length; i++) {
-            let date = new Date();
-            if (exerciseData[i].date) {
-              date = new Date(exerciseData[i].date);
+        ExerciseModel.find(filter, (err3, exerciseData) => {
+          if (err3) done(err3);
+          else {
+            let logData = Array();
+            for (i=0; i < exerciseData.length; i++) {
+              let date = new Date();
+              if (exerciseData[i].date) {
+                date = new Date(exerciseData[i].date);
+              }
+              logData[i] = {
+                description: exerciseData[i].description,
+                duration: exerciseData[i].duration,
+                date: dateToStringDate(date)
+              };
             }
-            logData[i] = {
-              description: exerciseData[i].description,
-              duration: exerciseData[i].duration,
-              date: dateToStringDate(date)
+
+            let responseData = {
+              _id: userData._id,
+              username: userData.username,
+              count: exerciseData.length,
+              log: logData
             };
+
+            done(null, responseData);
           }
-
-          let responseData = {
-            _id: userData._id,
-            username: userData.username,
-            count: exerciseData.length,
-            log: logData
-          };
-
-          done(null, responseData);
-        }
-      });
+        }).limit(limit);
+      } catch (err2) {
+        done(err2);
+      }
     }
   });
 }
