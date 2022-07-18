@@ -85,7 +85,7 @@ const getUserLogs = (_id, from, to, limit, done) => {
         if (from != null) filter.date = { $gte: from };
         if (to != null) filter.date = { $lte: to };
         if (limit == null) limit = 0;
-        else limit = Number.parseInt(limit);
+        else limit = Number.parseInt(Math.abs(limit));
 
         ExerciseModel.find(filter, (err3, exerciseData) => {
           if (err3) done(err3);
