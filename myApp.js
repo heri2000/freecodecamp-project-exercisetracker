@@ -88,8 +88,12 @@ const getUserLogs = (_id, from, to, limit, done) => {
         if (from != null) filter.$and.push({ date: { $gte: from } });
         if (to != null) filter.$and.push({ date: { $lte: to } });
 
+        // console.log(limit);
+
         if (limit == null) limit = 0;
         else limit = Number.parseInt(Math.abs(limit));
+
+        // console.log(JSON.stringify(filter));
 
         ExerciseModel.find(filter, (err3, exerciseData) => {
           if (err3) done(err3);
