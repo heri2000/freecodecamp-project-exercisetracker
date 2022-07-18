@@ -81,34 +81,45 @@ const getUserLogs = (_id, from, to, limit, done) => {
     if (err1) done(err1);
     else {
       try {
-        let filter = { user_id: _id };
-        if (from != null) filter.date = { $gte: from };
-        if (to != null) filter.date = { $lte: to };
+        let filter = { $and: [
+          { user_id: _id }
+        ]};
+
+        if (from != null) filter.$and.push({ date: { $gte: from } });
+        if (to != null) filter.$and.push({ date: { $lte: to } });
+
         if (limit == null) limit = 0;
         else limit = Number.parseInt(Math.abs(limit));
 
         ExerciseModel.find(filter, (err3, exerciseData) => {
           if (err3) done(err3);
           else {
-            let logData = Array();
-            for (i=0; i < exerciseData.length; i++) {
+            let responseData = {
+              _id: userData._id,
+              username: userData.username
+            };
+
+            if (from != null) responseData.from = dateToStringDate(new Date(from));
+            if (to != null) responseData.to = dateToStringDate(new Date(to));
+
+            let count = 0;
+            if (exerciseData.length) {
+              count = exerciseData.length;
+            }
+            responseData.count = count;
+
+            responseData.log = Array();
+            for (let i=0; i < count; i++) {
               let date = new Date();
               if (exerciseData[i].date) {
                 date = new Date(exerciseData[i].date);
               }
-              logData[i] = {
+              responseData.log[i] = {
                 description: exerciseData[i].description,
                 duration: exerciseData[i].duration,
                 date: dateToStringDate(date)
               };
             }
-
-            let responseData = {
-              _id: userData._id,
-              username: userData.username,
-              count: exerciseData.length,
-              log: logData
-            };
 
             done(null, responseData);
           }
